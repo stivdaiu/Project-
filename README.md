@@ -39,7 +39,7 @@ Tools:
 
 
 Instalation:
-1.git clone https://github.com/stivdaiu/Project-.git
+1.git clone https://github.com/stivdaiu/Project-InvoiceSystem.git
 2.cd invoice-generator
 3.npm install
 4.npm start 
