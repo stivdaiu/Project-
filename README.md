@@ -12,6 +12,6 @@ jsPDF
 
 
 Instalation:
-git clone 
+1.git clone 
 npm install
 npm start 
