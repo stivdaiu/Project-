@@ -11,7 +11,7 @@ Html-to-image
 jsPDF
 
 
-Instalation
+Instalation:
 git clone 
 npm install
 npm start 
