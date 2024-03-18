@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { uid } from 'uid';
 import InvoiceItem from './InvoiceItem';
 import InvoiceModal from './InvoiceModal';
 import incrementString from '../helpers/incrementString';
+
 const date = new Date();
 const today = date.toLocaleDateString('en-GB', {
   month: 'numeric',
@@ -17,6 +18,7 @@ const InvoiceForm = () => {
   const [invoiceNumber, setInvoiceNumber] = useState(1);
   const [cashierName, setCashierName] = useState('');
   const [customerName, setCustomerName] = useState('');
+  const [customers, setCustomers] = useState([]);
   const [items, setItems] = useState([
     {
       id: uid(6),
@@ -25,6 +27,32 @@ const InvoiceForm = () => {
       price: '1.00',
     },
   ]);
+  const [itemOptions, setItemOptions] = useState([]);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const response = await fetch('http://sad1.ivaelektronik.com:8081/api/Customers');
+        const data = await response.json();
+        setCustomers(data);
+      } catch (error) {
+        console.error('Error fetching customers:', error);
+      }
+    };
+
+    const fetchItems = async () => {
+      try {
+        const response = await fetch('http://sad1.ivaelektronik.com:8081/api/Items');
+        const data = await response.json();
+        setItemOptions(data);
+      } catch (error) {
+        console.error('Error fetching items:', error);
+      }
+    };
+
+    fetchCustomers();
+    fetchItems();
+  }, []);
 
   const reviewInvoiceHandler = (event) => {
     event.preventDefault();
@@ -67,13 +95,13 @@ const InvoiceForm = () => {
       value: event.target.value,
     };
 
-    const newItems = items.map((items) => {
-      for (const key in items) {
-        if (key === editedItem.name && items.id === editedItem.id) {
-          items[key] = editedItem.value;
+    const newItems = items.map((item) => {
+      for (const key in item) {
+        if (key === editedItem.name && item.id === editedItem.id) {
+          item[key] = editedItem.value;
         }
       }
-      return items;
+      return item;
     });
 
     setItems(newItems);
@@ -90,7 +118,7 @@ const InvoiceForm = () => {
 
   return (
     <form
-      className="relative flex flex-col px-2 md:flex-row"
+className="relative flex flex-col px-2 md:flex-row"
       onSubmit={reviewInvoiceHandler}
     >
       <div className="my-6 flex-1 space-y-2  rounded-md bg-white p-4 shadow-sm sm:space-y-4 md:p-6">
@@ -142,16 +170,21 @@ const InvoiceForm = () => {
           >
             Customer:
           </label>
-          <input
+          <select
             required
             className="flex-1"
-            placeholder="Customer name"
-            type="text"
             name="customerName"
             id="customerName"
             value={customerName}
             onChange={(event) => setCustomerName(event.target.value)}
-          />
+          >
+            <option value="">Select a customer</option>
+            {customers.map((customer) => (
+              <option key={customer.id} value={customer.name}>
+                {customer.name}
+              </option>
+            ))}
+          </select>
         </div>
         <table className="w-full p-4 text-left">
           <thead>
