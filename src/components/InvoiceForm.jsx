@@ -19,14 +19,7 @@ const InvoiceForm = () => {
   const [cashierName, setCashierName] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customers, setCustomers] = useState([]);
-  const [items, setItems] = useState([
-    {
-      id: uid(6),
-      name: '',
-      qty: 1,
-      price: '1.00',
-    },
-  ]);
+  const [items, setItems] = useState([]);
   const [itemOptions, setItemOptions] = useState([]);
 
   useEffect(() => {
@@ -53,6 +46,19 @@ const InvoiceForm = () => {
     fetchCustomers();
     fetchItems();
   }, []);
+
+  useEffect(() => {
+    if (itemOptions.length > 0) {
+      setItems([
+        {
+          id: uid(6),
+          name: itemOptions[0].name,
+          qty: 1,
+          price: itemOptions[0].price.toFixed(2),
+        },
+      ]);
+    }
+  }, [itemOptions]);
 
   const reviewInvoiceHandler = (event) => {
     event.preventDefault();
@@ -88,18 +94,19 @@ const InvoiceForm = () => {
     setItems((prevItem) => prevItem.filter((item) => item.id !== id));
   };
 
-  const edtiItemHandler = (event) => {
+  const edtiItemHandler = (event, itemIndex) => {
     const editedItem = {
       id: event.target.id,
       name: event.target.name,
       value: event.target.value,
     };
 
-    const newItems = items.map((item) => {
-      for (const key in item) {
-        if (key === editedItem.name && item.id === editedItem.id) {
-          item[key] = editedItem.value;
-        }
+    const newItems = items.map((item, index) => {
+      if (index === itemIndex) {
+        return {
+          ...item,
+          [editedItem.name]: editedItem.value,
+        };
       }
       return item;
     });
@@ -118,7 +125,7 @@ const InvoiceForm = () => {
 
   return (
     <form
-className="relative flex flex-col px-2 md:flex-row"
+      className="relative flex flex-col px-2 md:flex-row"
       onSubmit={reviewInvoiceHandler}
     >
       <div className="my-6 flex-1 space-y-2  rounded-md bg-white p-4 shadow-sm sm:space-y-4 md:p-6">
@@ -160,8 +167,7 @@ className="relative flex flex-col px-2 md:flex-row"
             placeholder="Cashier name"
             type="text"
             name="cashierName"
-            id="cashierName"
-            value={cashierName}
+            id="cashierName"value={cashierName}
             onChange={(event) => setCashierName(event.target.value)}
           />
           <label
@@ -196,20 +202,22 @@ className="relative flex flex-col px-2 md:flex-row"
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => (
+            {items.map((item, index) => (
               <InvoiceItem
                 key={item.id}
                 id={item.id}
                 name={item.name}
                 qty={item.qty}
                 price={item.price}
+                itemOptions={itemOptions}
+                itemIndex={index}
                 onDeleteItem={deleteItemHandler}
                 onEdtiItem={edtiItemHandler}
               />
             ))}
           </tbody>
         </table>
-        <button
+               <button
           className="rounded-md bg-blue-500 px-4 py-2 text-sm text-white shadow-sm hover:bg-blue-600"
           type="button"
           onClick={addItemHandler}
@@ -318,3 +326,4 @@ className="relative flex flex-col px-2 md:flex-row"
 };
 
 export default InvoiceForm;
+
