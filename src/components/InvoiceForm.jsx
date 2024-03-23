@@ -19,7 +19,14 @@ const InvoiceForm = () => {
   const [cashierName, setCashierName] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customers, setCustomers] = useState([]);
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState([
+    {
+      id: uid(6),
+      name: '',
+      qty: 1,
+      price: '1.00',
+    },
+  ]);
   const [itemOptions, setItemOptions] = useState([]);
 
   useEffect(() => {
@@ -46,19 +53,6 @@ const InvoiceForm = () => {
     fetchCustomers();
     fetchItems();
   }, []);
-
-  useEffect(() => {
-    if (itemOptions.length > 0) {
-      setItems([
-        {
-          id: uid(6),
-          name: itemOptions[0].name,
-          qty: 1,
-          price: itemOptions[0].price.toFixed(2),
-        },
-      ]);
-    }
-  }, [itemOptions]);
 
   const reviewInvoiceHandler = (event) => {
     event.preventDefault();
@@ -94,21 +88,20 @@ const InvoiceForm = () => {
     setItems((prevItem) => prevItem.filter((item) => item.id !== id));
   };
 
-  const edtiItemHandler = (event, itemIndex) => {
+  const edtiItemHandler = (event) => {
     const editedItem = {
       id: event.target.id,
       name: event.target.name,
       value: event.target.value,
     };
 
-    const newItems = items.map((item, index) => {
-      if (index === itemIndex) {
-        return {
-          ...item,
-          [editedItem.name]: editedItem.value,
-        };
+    const newItems = items.map((items) => {
+      for (const key in items) {
+        if (key === editedItem.name && items.id === editedItem.id) {
+          items[key] = editedItem.value;
+        }
       }
-      return item;
+      return items;
     });
 
     setItems(newItems);
@@ -128,7 +121,7 @@ const InvoiceForm = () => {
       className="relative flex flex-col px-2 md:flex-row"
       onSubmit={reviewInvoiceHandler}
     >
-      <div className="my-6 flex-1 space-y-2  rounded-md bg-white p-4 shadow-sm sm:space-y-4 md:p-6">
+      <div className="my-6 flex-1 space-y-2 rounded-md bg-white p-4 shadow-sm sm:space-y-4 md:p-6">
         <div className="flex flex-col justify-between space-y-2 border-b border-gray-900/10 pb-4 md:flex-row md:items-center md:space-y-0">
           <div className="flex space-x-2">
             <span className="font-bold">Current Date: </span>
@@ -151,7 +144,7 @@ const InvoiceForm = () => {
             />
           </div>
         </div>
-        <h1 className="text-center text-lg font-bold">INVOICE</h1>
+       
         <h1 className="text-center text-lg font-bold">IVA ELEKTRONIK</h1>
 
         <div className="grid grid-cols-2 gap-2 pt-4 pb-8">
@@ -167,7 +160,8 @@ const InvoiceForm = () => {
             placeholder="Cashier name"
             type="text"
             name="cashierName"
-            id="cashierName"value={cashierName}
+            id="cashierName"
+            value={cashierName}
             onChange={(event) => setCashierName(event.target.value)}
           />
           <label
@@ -192,6 +186,42 @@ const InvoiceForm = () => {
             ))}
           </select>
         </div>
+
+        <div className="grid grid-cols-2 gap-2 pt-4 pb-8">
+          <label
+            htmlFor="itemName"
+            className="text-sm font-bold md:text-base"
+          >
+           List of Items:
+          </label>
+          <select
+            required
+            className="flex-1"
+            name="itemName"
+            id="itemName"
+            value={items.name}
+            onChange={(event) => {
+              const selectedItem = itemOptions.find(item => item.name === event.target.value);
+              setItems(prevItems => [
+                ...prevItems,
+                {
+                  id: uid(6),
+                  name: selectedItem ? selectedItem.name : '',
+                  qty: 1,
+                  price: selectedItem ? selectedItem.price.toFixed(2) : '1.00',
+                }
+              ]);
+            }}
+          >
+            <option value="">Select an item</option>
+            {itemOptions.map((item) => (
+              <option key={item.id} value={item.name}>
+                {item.name}
+              </option>
+            ))}
+            </select>
+        </div>
+
         <table className="w-full p-4 text-left">
           <thead>
             <tr className="border-b border-gray-900/10 text-sm md:text-base">
@@ -202,28 +232,20 @@ const InvoiceForm = () => {
             </tr>
           </thead>
           <tbody>
-            {items.map((item, index) => (
+            {items.map((item) => (
               <InvoiceItem
                 key={item.id}
                 id={item.id}
                 name={item.name}
                 qty={item.qty}
                 price={item.price}
-                itemOptions={itemOptions}
-                itemIndex={index}
                 onDeleteItem={deleteItemHandler}
                 onEdtiItem={edtiItemHandler}
               />
             ))}
           </tbody>
         </table>
-               <button
-          className="rounded-md bg-blue-500 px-4 py-2 text-sm text-white shadow-sm hover:bg-blue-600"
-          type="button"
-          onClick={addItemHandler}
-        >
-          Add Item
-        </button>
+     
         <div className="flex flex-col items-end space-y-2 pt-6">
           <div className="flex w-full justify-between md:w-1/2">
             <span className="font-bold">Subtotal:</span>
@@ -255,8 +277,7 @@ const InvoiceForm = () => {
             className="w-full rounded-md bg-blue-500 py-2 text-sm text-white shadow-sm hover:bg-blue-600"
             type="submit"
           >
-            Review Invoice
-          </button>
+Save          </button>
           <InvoiceModal
             isOpen={isOpen}
             setIsOpen={setIsOpen}
@@ -326,4 +347,3 @@ const InvoiceForm = () => {
 };
 
 export default InvoiceForm;
-
