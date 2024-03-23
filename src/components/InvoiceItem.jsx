@@ -1,51 +1,28 @@
 import React from 'react';
 import InvoiceField from './InvoiceField';
 
-const InvoiceItem = ({
-  id,
-  name,
-  qty,
-  price,
-  itemOptions,
-  onDeleteItem,
-  onEditItem
-}) => {
+const InvoiceItem = ({ id, name, qty, price, onDeleteItem, onEdtiItem }) => {
   const deleteItemHandler = () => {
     onDeleteItem(id);
   };
 
-  const handleItemChange = (event) => {
-    const selectedItem = itemOptions.find(item => item.name === event.target.value);
-    const updatedItem = {
-      id: selectedItem.id,
-      name: selectedItem.name,
-      qty: qty,
-      price: selectedItem.price.toFixed(2),
-    };
-    onEditItem(updatedItem);
-  };
-
   return (
     <tr>
-      <td className="min-w-[150px] md:min-w-[200px]">
-        <select
-          className="border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:ring-opacity-50"
-          name="name"
-          value={name}
-          onChange={handleItemChange}
-          required
-        >
-          <option value="">Select an item</option>
-          {itemOptions.map((item) => (
-            <option key={item.id} value={item.name}>
-              {item.name}
-            </option>
-          ))}
-        </select>
+      <td className="w-full">
+        <InvoiceField
+          onEditItem={(event) => onEdtiItem(event)}
+          cellData={{
+            placeholder: 'Item name',
+            type: 'text',
+            name: 'name',
+            id: id,
+            value: name,
+          }}
+        />
       </td>
       <td className="min-w-[65px] md:min-w-[80px]">
         <InvoiceField
-          onEditItem={(event) => onEditItem({ id, name: 'qty', value: event.target.value })}
+          onEditItem={(event) => onEdtiItem(event)}
           cellData={{
             type: 'number',
             min: '1',
@@ -71,7 +48,7 @@ const InvoiceItem = ({
           />
         </svg>
         <InvoiceField
-          onEditItem={(event) => onEditItem({ id, name: 'price', value: event.target.value })}
+          onEditItem={(event) => onEdtiItem(event)}
           cellData={{
             className: 'text-right',
             type: 'number',
